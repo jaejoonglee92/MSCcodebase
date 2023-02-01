@@ -1,5 +1,5 @@
-function Run_Infomap_2015(rmat, dmatname, xdistance, thresholdarray, makebinary, outdir, numpools,structure_indices)
-%Run_Infomap(rmat, dmatname, xdistance, thresholdarray, makebinary, outdir, [numpools],[structure_indices])
+function Run_Infomap_2015(rmat, dmatname, xdistance, thresholdarray, makebinary, outdir, numpools,structure_indices, infomapfolder)
+%Run_Infomap(rmat, dmatname, xdistance, thresholdarray, makebinary, outdir, [numpools],[structure_indices], infomapfolder)
 %
 % Run infomap on a matrix with a given distance exclusion, at various
 % density thresholds, and write the results from all thresholds into a
@@ -115,24 +115,24 @@ for i = 1:numanalyses
         pajekfile = [outdir '/pajek_col' num2str(i) '.net'];
         edgesleft=round(thresholdarray(i)*numpossibleedges);
         numuse = edgesleft + numnodes + 2; % Number of edges plus number of nodes plus 2 lines for the headers in the pajek file
-        evalc(['!head -n ' num2str(numuse) ' ' pajekfileorig ' >! ' pajekfile]);
+        evalc(['!head -n ' num2str(numuse) ' ' pajekfileorig ' > ' pajekfile]);
     end
 end
     
 
 
 % do analyses at each threshold
-pool = parpool(numpools);
+if isempty(gcp('nocreate')); parpool(numpools); end
 parfor i=1:numanalyses
     fprintf('Thr/box %d, pass %d\n',i);
     
     tic
     pajekfile = [ outdir '/pajek_col' num2str(i) '.net' ];
-    rawclrs = run_infomap_on_pajekfile(pajekfile,100);
+    rawclrs = run_infomap_on_pajekfile(pajekfile,100,infomapfolder);
     dlmwrite([outdir '/rawassn_col' num2str(i) '.txt'],rawclrs,'\t')
     toc
 end
-delete(gcp)
+delete(gcp('nocreate'));
 
 for i = 1:numanalyses
     pajekfile = [ outdir '/pajek_col' num2str(i) '.net' ];
