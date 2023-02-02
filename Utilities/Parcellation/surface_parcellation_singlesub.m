@@ -1,5 +1,5 @@
-function  surface_parcellation_singlesub(subject,dconnfile,surfdir,subsample,dosubcort,outputdir)
-%surface_parcellation(cohortfile,tmasklist,surfdir,[subsample],[dosubcort],[outputdir])
+function  surface_parcellation_singlesub(subject,dconnfile,surfdir,subsample,dosubcort,outputdir,numpools)
+%surface_parcellation(cohortfile,tmasklist,surfdir,[subsample],[dosubcort],[outputdir],[numpools])
 %
 % Generate gradient-based parcellation on surface registered subject data in
 % cifti format. 
@@ -49,6 +49,10 @@ end
 
 if ~exist('outputdir') || isempty(outputdir)
     outputdir = pwd;
+end
+
+if ~exist('numpools') || isempty(numpools)
+    numpools = 1;
 end
 
 warning off
@@ -141,6 +145,7 @@ fullgrads_smooth = ciftistruct.data;
 ciftistruct.data = [];
 
 delete([outputdir '/' gradsname '.dtseries.nii'])
+delete([outputdir '/' gradsname '_smooth' num2str(smooth) '.dtseries.nii'])
 
 disp('Calculating edges')
 
@@ -149,7 +154,7 @@ disp('Calculating edges')
 minimametrics = metric_minima_all_cifti(fullgrads_smooth,3,neighbors);
 
 % Run watershed-by-flooding algorithm on each gradient map to generate edges
-edges = watershed_algorithm_all_par_cifti(fullgrads_smooth,minimametrics,200,1,neighbors);
+edges = watershed_algorithm_all_par_cifti(fullgrads_smooth,minimametrics,200,1,neighbors,numpools);
 clear fullgrads_smooth
 
 % Average across gradient maps and save

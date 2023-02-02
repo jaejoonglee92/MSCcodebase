@@ -1,4 +1,4 @@
-function labels = watershed_algorithm_all_par_cifti(edgemetrics,minimametrics,stepnum,fracmaxh, neighbors)
+function labels = watershed_algorithm_all_par_cifti(edgemetrics,minimametrics,stepnum,fracmaxh, neighbors,numpools)
 
 %Label initial markers with unique value
 labels = zeros(size(minimametrics));
@@ -11,7 +11,7 @@ step = (maxh-minh)/stepnum;
 hiter = minh:step:stoph;
 system('mkdir countingDir')
 system('touch countingDir/countfile')
-pool = parpool(8);
+if isempty(gcp('nocreate')); parpool(numpools); end
 %matlabpool open 8
 numlabels = size(labels,2);
 divisions = 4;
@@ -86,5 +86,5 @@ for j = 1:divisions
     end
 end
 system('rm -r countingDir')
-delete(gcp);
+delete(gcp('nocreate'));
 %matlabpool close
