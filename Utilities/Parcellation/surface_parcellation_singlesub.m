@@ -100,8 +100,8 @@ ciftistruct_orig.data = corrofcorr;
 if ~dosubcort
     ncortverts = nnz((ciftistruct_orig.brainstructure > 0) & (ciftistruct_orig.brainstructure < 3));
     ciftistruct_orig.data = ciftistruct_orig.data(1:ncortverts,:);
+    ciftistruct_orig.pos(ciftistruct_orig.brainstructure > 2, :) = [];
     ciftistruct_orig.brainstructure(ciftistruct_orig.brainstructure > 2) = [];
-    ciftistruct_orig.pos(ciftistruct_orig.brainstructure > 2) = [];
     ciftistruct_orig.brainstructurelabel(3:end) = [];
     try     ciftistruct_orig = rmfield(ciftistruct_orig,'dim');
             ciftistruct_orig = rmfield(ciftistruct_orig,'transform');
@@ -118,7 +118,7 @@ ciftistruct_orig.data = [];
 % Calculate gradients
 disp('Calculating gradient')
 gradsname = 'corrofcorr_allgrad_LR_subcort';
-[~,~] = system([workbenchdir '/wb_command -cifti-gradient ' outputdir '/corrofcorr_LR_subcort.dtseries.nii COLUMN ' outputdir '/' gradsname '.dtseries.nii -left-surface ' midsurf_32k_sub{1} ' -right-surface ' midsurf_32k_sub{2}]);
+system(['wb_command -cifti-gradient ' outputdir '/corrofcorr_LR_subcort.dtseries.nii COLUMN ' outputdir '/' gradsname '.dtseries.nii -left-surface ' midsurf_32k_sub{1} ' -right-surface ' midsurf_32k_sub{2}]);
 
 delete([outputdir '/corrofcorr_LR_subcort.dtseries.nii'])
 
@@ -126,7 +126,7 @@ delete([outputdir '/corrofcorr_LR_subcort.dtseries.nii'])
 
 % Smooth gradients before edge detection
 disp('Smoothing gradient')
-[~,~] = system([workbenchdir '/wb_command -cifti-smoothing ' outputdir '/' gradsname '.dtseries.nii ' num2str(smooth) ' ' num2str(smooth) ' COLUMN ' outputdir '/' gradsname '_smooth' num2str(smooth) '.dtseries.nii -left-surface ' midsurf_32k_sub{1} ' -right-surface ' midsurf_32k_sub{2}]);
+system(['wb_command -cifti-smoothing ' outputdir '/' gradsname '.dtseries.nii ' num2str(smooth) ' ' num2str(smooth) ' COLUMN ' outputdir '/' gradsname '_smooth' num2str(smooth) '.dtseries.nii -left-surface ' midsurf_32k_sub{1} ' -right-surface ' midsurf_32k_sub{2}]);
 
 neighbors = cifti_neighbors([outputdir '/' gradsname '_smooth' num2str(smooth) '.dtseries.nii']);
 
@@ -149,7 +149,7 @@ disp('Calculating edges')
 minimametrics = metric_minima_all_cifti(fullgrads_smooth,3,neighbors);
 
 % Run watershed-by-flooding algorithm on each gradient map to generate edges
-edges = watershed_algorithm_all_cifti(fullgrads_smooth,minimametrics,200,1,neighbors);
+edges = watershed_algorithm_all_par_cifti(fullgrads_smooth,minimametrics,200,1,neighbors);
 clear fullgrads_smooth
 
 % Average across gradient maps and save

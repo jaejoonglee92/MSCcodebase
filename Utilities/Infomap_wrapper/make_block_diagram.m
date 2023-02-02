@@ -38,13 +38,12 @@ imagesc(sortedmat); colormap(reorderedcolors);
 
 set(gca,'FontSize',20)
 set(gca,'FontWeight','bold')
-xticks = get(gca,'XTick');
-for i = 1:length(xticks)
-    string = sprintf('%.3f',thresholds(xticks(i)));
+for i = 1:length(thresholds)
+    string = sprintf('%.3f',thresholds(i));
     threshlabel(i,:) = string(2:end);
 end
 set(gca,'YTick',[])
-set(gca,'XTickLabel',threshlabel)
+set(gca,'XTick',1:length(thresholds),'XTickLabel',threshlabel)
 
 dotsloc = strfind(recolored_allcolumns_file,'.');
 outname = [recolored_allcolumns_file(1:dotsloc(1)-1) '_block_diagram'];
