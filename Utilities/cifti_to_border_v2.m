@@ -34,7 +34,7 @@ wholesurf_indswithdata = data_template.brainstructure(1:num_wholesurfverts) > 0;
 data_wholesurf(wholesurf_indswithdata,:) = data(1:nnz(wholesurf_indswithdata),:);
 
 data_bothhems = data_wholesurf;
-IDs = unique(data_bothhems); IDs(IDs==0) = [];
+IDs = unique(data_bothhems); IDs(IDs==0 | isnan(IDs)) = [];
     
 if ~exist('allcolors_inonemap'); allcolors_inonemap = 0; end
 if logical(allcolors_inonemap)
